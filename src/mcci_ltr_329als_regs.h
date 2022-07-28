@@ -113,7 +113,6 @@ namespace Mcci_Ltr_329als_Regs {
             return 1500;
             }
 
-
         ///
         /// \brief an abstract class to help with managing fields
         ///
@@ -255,7 +254,7 @@ namespace Mcci_Ltr_329als_Regs {
             : m_value(mask)
             {}
 
-        /// \brief return register value
+        /// \brief return register value converted to a std::uint8_t.
         std::uint8_t getValue() const
             {
             return m_value;
@@ -353,16 +352,24 @@ namespace Mcci_Ltr_329als_Regs {
             : m_value(mask)
             {}
 
-        /// \brief return register value
+        /// \brief return register value as a std::uint8_t
         constexpr std::uint8_t getValue() const
             {
             return m_value;
             }
 
+        ///
+        /// \brief Abstract type wide enough to store any measurement rate value.
+        ///
+        /// \note The name is confusing. A rate is usually expressed as per-second, but
+        ///     the LTR-329ALS datasheet expresses it in milliseconds (seconds-per).
+        ///
         using Rate_t = std::uint16_t;
+
+        /// \brief Abstract type wide enough to store any integration time value.
         using Integration_t = std::uint16_t;
 
-        /// \brief convert rate (ms / measurement) to bits
+        /// \brief convert measurement rate (expressed as ms / measurement) to register bit value
         constexpr static std::uint8_t rateToBits(Rate_t rate)
             {
             return  (rate <= 50)    ? 0b000
@@ -374,7 +381,7 @@ namespace Mcci_Ltr_329als_Regs {
                 ;
             }
 
-        /// \brief convert bits to rate in ms
+        /// \brief convert register bit value to measurement rate in ms
         constexpr static Rate_t bitsToRate(std::uint8_t bits)
             {
             return  (bits == 0b000) ? 50
@@ -601,7 +608,11 @@ namespace Mcci_Ltr_329als_Regs {
             return *this;
             }
 
-        /// \brief get the data valid bit from a register image
+        ///
+        /// \brief get the data valid bit from a register image.
+        ///
+        /// \note the valid bit is zero for valid, non-zero for invalid.
+        ///
         bool getValid() const
             {
             return ! (this->m_value & std::uint8_t(ALS_STATUS_BITS::INVALID));
@@ -621,7 +632,7 @@ namespace Mcci_Ltr_329als_Regs {
     class DataRegs_t
         {
     private:
-        /// \brief the register images
+        /// \brief the register images in I2C order
         std::uint8_t m_data[4];
         AlsStatus_t m_status;       ///< recorded status register when data was grabbed.
         AlsMeasRate_t m_measrate;   ///< recorded measrate used for grabbing the data
@@ -634,13 +645,13 @@ namespace Mcci_Ltr_329als_Regs {
             return (this->m_data[3] << 8) | this->m_data[2];
             }
 
-        /// \brief get the value of channel 1.
+        /// \brief get the value of channel 1 from the measurement.
         std::uint16_t getChan1() const
             {
             return (this->m_data[1] << 8) | this->m_data[0];
             }
 
-        /// \brief initialize the data buffer
+        /// \brief initialize the data buffer to zeroes.
         void init()
             {
             this->m_data[0] = 0;
@@ -649,7 +660,7 @@ namespace Mcci_Ltr_329als_Regs {
             this->m_data[3] = 0;
             }
 
-        /// \brief return pointer to the data buffer
+        /// \brief return a pointer to the base of the data buffer
         std::uint8_t *getDataPointer()
             {
             return this->m_data;
@@ -661,18 +672,19 @@ namespace Mcci_Ltr_329als_Regs {
             return sizeof(this->m_data);
             }
 
-        /// \brief save the value of the status register for future computation
+        /// \brief Save an image of the status register for future computation
         void setStatus(AlsStatus_t status)
             {
             this->m_status = status;
             }
 
-        /// \brief save the value of the meas/rate register for future computation
+        /// \brief Save an image of the meas/rate register for future computation
         void setMeasRate(AlsMeasRate_t measRate)
             {
             this->m_measrate = measRate;
             }
 
+        ///
         /// \brief Compute abstract value of lux based on datasheet
         ///
         /// \param [in] ch0 is the measurement for channel 0
