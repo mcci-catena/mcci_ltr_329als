@@ -15,6 +15,7 @@ Author:
 
 #include "mcci_ltr_329als.h"
 #include <Arduino.h>
+#include <cstdint>
 #include <stdint.h>
 
 using namespace Mcci_Ltr_329als;
@@ -91,13 +92,54 @@ Ltr_329als::begin(
         this->m_startTime = millis();
         this->m_delay = LTR_329ALS_PARAMS::getInitialDelayMs();
 
+        this->setState(State::PowerOn);
+
+        while ((std::uint32_t)millis() - this->m_startTime < this->m_delay);
         this->setState(State::Initial);
+        AlsContr_t(0).setActive(true);
+
+        // set gain, measurement and integration time for white LED
+        this->configure(
+            LTR_329ALS_PARAMS::kGain,
+            LTR_329ALS_PARAMS::kIntegrationTime,
+            LTR_329ALS_PARAMS::kMeasurementTime
+            );
+
+        this->m_startTime = millis();
+        this->m_delay = LTR_329ALS_PARAMS::getWakeupDelayMs();
+        while ((std::uint32_t)millis() - this->m_startTime < this->m_delay);
+        this->setState(State::Idle);
         }
 
     return result;
     }
 
 #undef FUNCTION
+
+void Ltr_329als::end(void)
+    {
+    if (this->isRunning())
+        this->setState(State::Uninitialized);
+
+    if (this->setStandby())
+        this->setState(State::End);
+    }
+
+bool Ltr_329als::reset()
+    {
+    this->m_control = AlsContr_t(0).setReset(false);
+    this->writeRegister(Register_t::ALS_CONTR, this->m_control.getValue());
+    }
+
+bool Ltr_329als::setStandby()
+    {
+    this->m_control = AlsContr_t(0).setActive(false);
+
+    if (this->writeRegister(Register_t::ALS_CONTR, this->m_control.getValue()))
+        return true;
+    else
+        return false;
+    }
 
 bool
 Ltr_329als::readProductInfo(
@@ -112,7 +154,9 @@ Ltr_329als::readProductInfo(
 
     if ((PartId >> 4) != m_partid.kPartID ||
         ManufacId != m_manufacid.kManufacID)
+        {
         return false;
+        }
 
     return true;
     }
@@ -156,6 +200,13 @@ Ltr_329als::readMeasurement()
     if (! this->checkRunning())
         return false;
 
+    // check the Als data status
+    this->readDataStatus();
+    if (!this->m_status.getNew())
+        return false;
+    if (!this->isDataValid())
+        return false;
+
     if (this->getState() != State::Idle)
         {
         // busy
@@ -163,11 +214,32 @@ Ltr_329als::readMeasurement()
         }
     else
         {
+        // read channel_1 msb data, followed by lsb data
         this->m_rawChannels.m_data[1] = this->readRegister(Register_t::ALS_DATA_CH1_0);
         this->m_rawChannels.m_data[0] = this->readRegister(Register_t::ALS_DATA_CH1_1);
+
+        // read channel_0 msb data, followed by lsb data
         this->m_rawChannels.m_data[3] = this->readRegister(Register_t::ALS_DATA_CH0_0);
         this->m_rawChannels.m_data[2] = this->readRegister(Register_t::ALS_DATA_CH0_1);
         }
+
+    return true;
+    }
+
+void Ltr_329als::readDataStatus()
+    {
+    this->m_saveStatus.m_value = this->readRegister(Register_t::ALS_STATUS);
+
+    this->m_status = AlsStatus_t(0)
+                            .setValid(this->m_saveStatus.m_value & 0x80)
+                            .setGain(this->m_saveStatus.m_value & 0x70)
+                            .setNew(this->m_saveStatus.m_value & 0x04)
+                            ;
+    }
+
+bool Ltr_329als::isDataValid()
+    {
+    return this->m_status.getValid();
     }
 
 bool
@@ -212,12 +284,17 @@ Ltr_329als::startSingleMeasurement()
         }
     }
 
-float Ltr_329als::getLux()
+float Ltr_329als::getLux() const
     {
     bool fError;
     float ambientLight;
 
     ambientLight = this->m_rawChannels.computeLux(&fError);
+
+    if (fError)
+        return false;
+
+    return ambientLight;
     }
 
 bool Ltr_329als::queryReady(bool &fError)
@@ -240,7 +317,7 @@ bool Ltr_329als::queryReady(bool &fError)
         return this->setLastError(Error::NotMeasuring);
         }
 
-    if ((std::int32_t)(millis() - this->m_startTime < this->m_currentIntegration)
+    if ((std::int32_t)(millis() - this->m_startTime < this->m_rate.getIntegration()))
         {
         fError = false;
         return this->setLastError(Error::Busy);

@@ -44,6 +44,11 @@ namespace Mcci_Ltr_329als_Regs {
         /// \brief the I2C address of the LTR-329ALS.
         static constexpr std::uint8_t Address = 0x29;
 
+        /// \brief gain, measurement time and integration time for White LED.
+        static constexpr std::uint8_t kGain = 96;
+        static constexpr std::uint8_t kIntegrationTime = 50;
+        static constexpr std::uint8_t kMeasurementTime = 100;
+
         /// \brief register addresses within the LTR-329ALS.
         enum class Reg_t : std::uint8_t
             {
@@ -52,9 +57,9 @@ namespace Mcci_Ltr_329als_Regs {
             PART_ID         = 0x86,             ///< part number and revision ID
             MANUFAC_ID      = 0x87,             ///< manufacturer ID
             ALS_DATA_CH1_0  = 0x88,             ///< ALS measurement data channel 1, LSB
-            ALS_DATA_CH1_1  /* = 0x89 */,       ///< ALS measurement data channel 1, MSB
-            ALS_DATA_CH0_0  /* = 0x8A */,       ///< ALS measurement data channel 0, LSB
-            ALS_DATA_CH0_1  /* = 0x8B */,       ///< ALS measurement data channel 0, MSB
+            ALS_DATA_CH1_1  = 0x89,             ///< ALS measurement data channel 1, MSB
+            ALS_DATA_CH0_0  = 0x8A,             ///< ALS measurement data channel 0, LSB
+            ALS_DATA_CH0_1  = 0x8B,             ///< ALS measurement data channel 0, MSB
             ALS_STATUS      = 0x8C,             ///< ALS new data status
             };
 

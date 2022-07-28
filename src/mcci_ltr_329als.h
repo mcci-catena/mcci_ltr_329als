@@ -18,6 +18,7 @@ Author:
 #ifndef _mcci_ltr_329als_h_
 #define _mcci_ltr_329als_h_ /* prevent multiple includes */
 
+#include <stdint.h>
 #pragma once
 
 #include <cstdint>
@@ -215,7 +216,7 @@ public:
     ///
     Ltr_329als(TwoWire &myWire)
         : m_wire(&myWire)
-        , m_lastError(0)
+        , m_lastError(Error::Success)
         {}
 
     // uses default destructor
@@ -236,7 +237,7 @@ public:
     bool configure(AlsGain_t::Gain_t g, AlsMeasRate_t::Rate_t r, AlsMeasRate_t::Integration_t iTime);
 
     /// \brief abstract type: holds a count of milliseconds
-    using ms_t = decltype(millis());
+    using ms_t = std::uint32_t;
 
     /// \brief abstract type: holds register address
     using Register_t = LTR_329ALS_PARAMS::Reg_t;
@@ -249,6 +250,12 @@ public:
 
     /// \brief read a measurement to the buffer
     bool readMeasurement();
+
+    /// \brief read a measured data status
+    void readDataStatus();
+
+    /// \brief read a measured data status
+    bool isDataValid();
 
     /// \brief getLux
     float getLux() const;
@@ -323,7 +330,7 @@ protected:
     bool writeRegister(Register_t r, std::uint8_t v);
 
     /// \brief read a byte from a given register.
-    bool readRegister(Register_t r);
+    uint8_t readRegister(Register_t r);
 
     //
     // The local variables
@@ -344,6 +351,7 @@ private:
     AlsMeasRate_t m_saveMeasRate;       ///< AlsMeasRate_t from last measurement
     PartID_t    m_partid;               ///< part id register
     ManufacID_t m_manufacid;            ///< manufac id register
+    State       m_state;                ///< state of measurement engine
     };
 
 } // end namespace Mcci_Ltr_329als
