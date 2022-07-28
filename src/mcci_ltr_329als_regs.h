@@ -23,96 +23,141 @@ Author:
 /// \brief constants related to the LTR-329ALS registers
 namespace Mcci_Ltr_329als_Regs {
 
-    /// \brief the I2C address of the LTR-329ALS.
-    constexpr std::uint8_t Address = 0x29;
-
-    /// \brief register addresses within the LTR-329ALS.
-    enum class Reg_t : std::uint8_t
-        {
-        ALS_CONTR       = 0x80,             ///< ALS operation mode register
-        ALS_MEAS_RATE   = 0x85,             ///< ALS measurement rate control
-        PART_ID         = 0x86,             ///< part number and revision ID
-        MANUFAC_ID      = 0x87,             ///< manufacturer ID
-        ALS_DATA_CH1_0  = 0x88,             ///< ALS measurement data channel 1, LSB
-        ALS_DATA_CH1_1  /* = 0x89 */,       ///< ALS measurement data channel 1, MSB
-        ALS_DATA_CH0_0  /* = 0x8A */,       ///< ALS measurement data channel 0, LSB
-        ALS_DATA_CH0_1  /* = 0x8B */,       ///< ALS measurement data channel 0, MSB
-        ALS_STATUS      = 0x8C,             ///< ALS new data status
-        };
-
-    /// \brief bits in the LTR-329ALS \c ALS_CONTR register
-    enum class ALS_CONTR_BITS : std::uint8_t
-        {
-        MODE =  (1 << 0),                   ///< mode control (active / not-suspended)
-        RESET = (1 << 1),                   ///< reset / not-reset
-        GAIN = (7 << 2),                    ///< gain control
-        };
-
-    /// \brief bits in the LTR-329ALS \c ALS_MEAS_RATE register
-    enum class ALS_MEAS_RATE_BITS : std::uint8_t
-        {
-        RATE = (3 << 0),                    ///< measurement rate
-        TIME = (3 << 3),                    ///< integration time
-        };
-
-    /// \brief bits in the LTR-32lALS \c PART_ID register
-    enum class PART_ID_BITS : std::uint8_t
-        {
-        REVID = 0xF << 0,                   ///< revision ID
-        PARTNUM = 0xF << 4,                 ///< part number
-        };
-
-    /// \brief bits in the LTR-329ALS \c ALS_STATUS register
-    enum class ALS_STATUS_BITS : std::uint8_t
-        {
-        NEW = 1 << 2,                       ///< new data if true
-        GAIN = 7 << 4,                      ///< Data gain range
-        VALID = 1 << 7,                     ///< valid data if true
-        };
-
     ///
-    /// \brief an abstract class to help with managing fields
+    /// \brief An abstract class containing the basic constants
+    ///     relevant to programming the LTR-329ALS sensor.
     ///
     /// \details
-    ///     All the register-image classes inherit from this class,
-    ///     in order to get a common way to handle multi-bit field
-    ///     within the register images.
+    ///     This class contains the I2C address, the register
+    ///     offset, and the principal bit definitions for the
+    ///     registers of the LTR-329ALS sensor. It is used
+    ///     in turn by the specializations that model each
+    ///     of the invidual registers.
     ///
-    ///     We use this rather than use C++ bit fields, because
-    ///     this is portable; bit order of C++ bit fields is not
-    ///     portable.
+    ///     It also encapsulates the basic template that is
+    ///     used for handling bit manipulations of the registers
+    ///     in a portable and reasonable type-safe way.
     ///
-    template <typename BASE_TYPE>
-    class Field_t
+    class LTR_329ALS_PARAMS
         {
-    private:
-    protected:
+    public:
+        /// \brief the I2C address of the LTR-329ALS.
+        static constexpr std::uint8_t Address = 0x29;
 
-        /// \brief extract the least-significant bit from a mask.
-        template <typename T>
-        static constexpr T fieldlsb(T fmask) { return ((fmask) & (~(fmask) + T(1))); }
+        /// \brief register addresses within the LTR-329ALS.
+        enum class Reg_t : std::uint8_t
+            {
+            ALS_CONTR       = 0x80,             ///< ALS operation mode register
+            ALS_MEAS_RATE   = 0x85,             ///< ALS measurement rate control
+            PART_ID         = 0x86,             ///< part number and revision ID
+            MANUFAC_ID      = 0x87,             ///< manufacturer ID
+            ALS_DATA_CH1_0  = 0x88,             ///< ALS measurement data channel 1, LSB
+            ALS_DATA_CH1_1  /* = 0x89 */,       ///< ALS measurement data channel 1, MSB
+            ALS_DATA_CH0_0  /* = 0x8A */,       ///< ALS measurement data channel 0, LSB
+            ALS_DATA_CH0_1  /* = 0x8B */,       ///< ALS measurement data channel 0, MSB
+            ALS_STATUS      = 0x8C,             ///< ALS new data status
+            };
 
-        /// \brief given a mask and a value to place in that mask, shift value left appropriately.
-        template <typename T>
-        static constexpr T fieldvalue(T fmask, T val) { return (fieldlsb(fmask) * val) & fmask; }
+        /// \brief bits in the LTR-329ALS \c ALS_CONTR register
+        enum class ALS_CONTR_BITS : std::uint8_t
+            {
+            MODE =  (1 << 0),                   ///< mode control (active / not-suspended)
+            RESET = (1 << 1),                   ///< reset / not-reset
+            GAIN = (7 << 2),                    ///< gain control
+            };
 
-        /// \brief given a mask and an image of the register, extract the bits from the field given
-        /// by mask, and right-justify.
-        template <typename T>
-        static constexpr T fieldget(T fmask, T val) { return (val & fmask) / fieldlsb(fmask); }
+        /// \brief bits in the LTR-329ALS \c ALS_MEAS_RATE register
+        enum class ALS_MEAS_RATE_BITS : std::uint8_t
+            {
+            RATE = (3 << 0),                    ///< measurement rate
+            TIME = (3 << 3),                    ///< integration time
+            };
+
+        /// \brief bits in the LTR-32lALS \c PART_ID register
+        enum class PART_ID_BITS : std::uint8_t
+            {
+            REVID = 0xF << 0,                   ///< revision ID
+            PARTNUM = 0xF << 4,                 ///< part number
+            };
+
+        /// \brief bits in the LTR-329ALS \c ALS_STATUS register
+        enum class ALS_STATUS_BITS : std::uint8_t
+            {
+            NEW = 1 << 2,                       ///< new data if true
+            GAIN = 7 << 4,                      ///< Data gain range
+            INVALID = 1 << 7,                   ///< invalid data if true
+            };
 
         ///
-        /// \brief given a mask, an image of the register, and a value, isert the bits from value
-        /// into the register.
+        /// \brief Return the required delay from reset to first operation,
+        ///     in milliseconds.
         ///
-        /// \param [in] fmask specifies the bits to be changed
-        /// \param [in] val is the input image of the register bits
-        /// \param [in] fv is the right-justified value to be put into the bits given by fmask.
+        /// \note No allowance is made for variation over temperature and
+        ///     voltage; the result is just the datasheet value.
         ///
-        /// \return the updated value.
+        static constexpr std::uint32_t getInitialDelayMs()
+            {
+            return 100;
+            }
+
+        /// \brief return the required delay from standby to active,
+        ///     in milliseconds.
+        static constexpr std::uint32_t getWakeupDelayMs()
+            {
+            return 10;
+            }
+
+        static constexpr std::uint32_t getMaxInitialDelayMs()
+            {
+            // data sheet says 1000, but that's at 25c and 3.0V.  Allow some margin.
+            return 1500;
+            }
+
+
         ///
-        template <typename T, typename TV>
-        static constexpr T fieldset(T fmask, T val, TV fv) { return (val & ~fmask) | (fv * fieldlsb(fmask)); }
+        /// \brief an abstract class to help with managing fields
+        ///
+        /// \details
+        ///     All the register-image classes inherit from this class,
+        ///     in order to get a common way to handle multi-bit field
+        ///     within the register images.
+        ///
+        ///     We use this rather than use C++ bit fields, because
+        ///     this is portable; bit order of C++ bit fields is not
+        ///     portable.
+        ///
+        template <typename BASE_TYPE>
+        class Field_t
+            {
+        private:
+        protected:
+
+            /// \brief extract the least-significant bit from a mask.
+            template <typename T>
+            static constexpr T fieldlsb(T fmask) { return ((fmask) & (~(fmask) + T(1))); }
+
+            /// \brief given a mask and a value to place in that mask, shift value left appropriately.
+            template <typename T>
+            static constexpr T fieldvalue(T fmask, T val) { return (fieldlsb(fmask) * val) & fmask; }
+
+            /// \brief given a mask and an image of the register, extract the bits from the field given
+            /// by mask, and right-justify.
+            template <typename T>
+            static constexpr T fieldget(T fmask, T val) { return (val & fmask) / fieldlsb(fmask); }
+
+            ///
+            /// \brief given a mask, an image of the register, and a value, isert the bits from value
+            /// into the register.
+            ///
+            /// \param [in] fmask specifies the bits to be changed
+            /// \param [in] val is the input image of the register bits
+            /// \param [in] fv is the right-justified value to be put into the bits given by fmask.
+            ///
+            /// \return the updated value.
+            ///
+            template <typename T, typename TV>
+            static constexpr T fieldset(T fmask, T val, TV fv) { return (val & ~fmask) | (fv * fieldlsb(fmask)); }
+            };
         };
 
 	///
@@ -194,7 +239,7 @@ namespace Mcci_Ltr_329als_Regs {
     ///     \code auto x = AlsContr_t(0).setActive(true).setGain(1);
     ///     \endcode
     ///
-    class AlsContr_t : public Field_t<std::uint8_t>, AlsGain_t
+    class AlsContr_t : public LTR_329ALS_PARAMS, LTR_329ALS_PARAMS::Field_t<std::uint8_t>, AlsGain_t
         {
     private:
         AlsContr_t & setValue(std::uint8_t fmask, std::uint8_t value)
@@ -292,7 +337,7 @@ namespace Mcci_Ltr_329als_Regs {
     ///                 ;
     ///     \endcode
     ///
-    class AlsMeasRate_t : public Field_t<std::uint8_t>
+    class AlsMeasRate_t : public LTR_329ALS_PARAMS, LTR_329ALS_PARAMS::Field_t<std::uint8_t>
         {
     private:
         AlsMeasRate_t & setValue(std::uint8_t fmask, std::uint8_t value)
@@ -415,7 +460,7 @@ namespace Mcci_Ltr_329als_Regs {
         };
 
     /// \brief Part ID register bit manipulations
-    class PartID_t : public Field_t<std::uint8_t>
+    class PartID_t : public LTR_329ALS_PARAMS, LTR_329ALS_PARAMS::Field_t<std::uint8_t>
         {
     private:
         PartID_t & setValue(std::uint8_t fmask, std::uint8_t value)
@@ -457,7 +502,7 @@ namespace Mcci_Ltr_329als_Regs {
         };
 
     /// \brief Manufacturer ID register
-    class ManufacID_t : public Field_t<std::uint8_t>
+    class ManufacID_t : public LTR_329ALS_PARAMS, LTR_329ALS_PARAMS::Field_t<std::uint8_t>
         {
     private:
         ManufacID_t & setValue(std::uint8_t fmask, std::uint8_t value)
@@ -499,7 +544,7 @@ namespace Mcci_Ltr_329als_Regs {
 	///		individual fields to be extracted from
 	///		an image without explicit shifting and masking.
     ///
-    class AlsStatus_t : public Field_t<std::uint8_t>, AlsGain_t
+    class AlsStatus_t : public LTR_329ALS_PARAMS, LTR_329ALS_PARAMS::Field_t<std::uint8_t>, AlsGain_t
         {
     private:
         AlsStatus_t & setValue(std::uint8_t fmask, std::uint8_t value)
@@ -552,17 +597,18 @@ namespace Mcci_Ltr_329als_Regs {
         /// \brief set the data valid bit in a register image.
         AlsStatus_t& setValid(bool fValid = true)
             {
-            this->setValue(std::uint8_t(ALS_STATUS_BITS::VALID), fValid);
+            this->setValue(std::uint8_t(ALS_STATUS_BITS::INVALID), ! fValid);
             return *this;
             }
 
         /// \brief get the data valid bit from a register image
         bool getValid() const
             {
-            return this->m_value & std::uint8_t(ALS_STATUS_BITS::VALID);
+            return ! (this->m_value & std::uint8_t(ALS_STATUS_BITS::INVALID));
             }
         };
 
+    ///
     /// \brief Simple class for LTR-329ALS data registers.
     ///
     /// \details
@@ -577,9 +623,12 @@ namespace Mcci_Ltr_329als_Regs {
     private:
         /// \brief the register images
         std::uint8_t m_data[4];
+        AlsStatus_t m_status;       ///< recorded status register when data was grabbed.
+        AlsMeasRate_t m_measrate;   ///< recorded measrate used for grabbing the data
+
 
     public:
-        /// \brief get the value of channel 0
+        /// \brief get the value of channel 0 from the measurement
         std::uint16_t getChan0() const
             {
             return (this->m_data[3] << 8) | this->m_data[2];
@@ -611,6 +660,81 @@ namespace Mcci_Ltr_329als_Regs {
             {
             return sizeof(this->m_data);
             }
+
+        /// \brief save the value of the status register for future computation
+        void setStatus(AlsStatus_t status)
+            {
+            this->m_status = status;
+            }
+
+        /// \brief save the value of the meas/rate register for future computation
+        void setMeasRate(AlsMeasRate_t measRate)
+            {
+            this->m_measrate = measRate;
+            }
+
+        /// \brief Compute abstract value of lux based on datasheet
+        ///
+        /// \param [in] ch0 is the measurement for channel 0
+        /// \param [in] ch1 is the measurement for channel 1
+        /// \param [in] gain is the gain used for the measurement (must be valid)
+        /// \param [in] iTime is the integration time in milliseconds
+        ///
+        /// \return The result is the value in Lux per appendix A of the datasheet.
+        ///
+        static constexpr float luxComputation(
+            std::uint16_t ch0,
+            std::uint16_t ch1,
+            std::uint32_t gain,
+            std::uint32_t iTime
+            )
+            {
+            float const ch01_sum = ch0 + ch1;
+            if (ch01_sum == 0.0f)
+                return 0.0f;
+
+            float const ratio = ch1 / ch01_sum;
+
+            float result = (ratio < 0.45f) ? (1.7743f * ch0 + 1.1059f * ch1)
+                         : (ratio < 0.64)  ? (4.2785f * ch0 - 1.9548f * ch1)
+                         : (ratio < 0.85)  ? (0.5926f * ch0 + 0.1185f * ch1)
+                         :                   0.0f
+                         ;
+
+            return (result * 100.0f) / (gain * iTime);
+            }
+
+        ///
+        /// \brief Compute lux based on the value of the data stored here
+        ///
+        /// \param [out] fError reference to a bool cell set true in case of
+        ///                     error in the calculation, set false if all
+        ///                     went well.
+        ///
+        /// \return The light value, in lux; or zero.
+        ///
+        float computeLux(bool &fError) const
+            {
+            if (! this->m_status.getValid())
+                {
+                fError = true;
+                return 0.0f;
+                }
+            if (! this->m_status.getNew())
+                {
+                fError = true;
+                return 0.0f;
+                }
+
+            float result = this->luxComputation(
+                                this->getChan0(),
+                                this->getChan1(),
+                                this->m_status.getGain(),
+                                this->m_measrate.getIntegration()
+                                );
+            fError = false;
+            return result;
+            }
         };
 
     //
@@ -638,6 +762,10 @@ namespace Mcci_Ltr_329als_Regs {
     static_assert(! AlsMeasRate_t::isIntegrationValid(51), "51 ms should not be valid");
     static_assert(! AlsMeasRate_t::isIntegrationValid(1999), "1999 ms should not be valid");
 
+    static_assert(DataRegs_t::luxComputation(0, 0, 1, 100) == 0.0, "lux computation is wrong");
+    static_assert(DataRegs_t::luxComputation(50, 100, 1, 100) != 0.0, "lux computation is wrong");
+    static_assert(DataRegs_t::luxComputation(100, 0, 1, 100) == 177.43f, "lux computation is wrong");
+    static_assert(DataRegs_t::luxComputation(1000, 100, 4, 200) == 235.6112366f, "lux computation is wrong");
 }
 
 #endif /* _mcci_ltr_329als_regs_h_ */

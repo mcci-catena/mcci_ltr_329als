@@ -39,6 +39,52 @@ static const char *scanMultiSzString(const char *p, unsigned eIndex);
 |
 \****************************************************************************/
 
+
+/*
+
+Name:	Ltr_329als::begin()
+
+Function:
+    Start operating the LTR-329ALS
+
+Definition:
+    bool Ltr_329als::begin(
+        void
+        );
+
+Description:
+    If the driver is already running, this function succeed.
+    Otherwise, this function assumes that the sensor has just
+    been powered up, and records the time.
+    Probe and so forth are delayed until the 100ms delay has elapsed.
+
+Returns:
+    true for success, false for failure. If any errors, then
+    Ltr_329als::getLastError() will return the error cause.
+
+Notes:
+
+
+*/
+
+#define FUNCTION "Ltr_329als::begin"
+
+bool
+Ltr_329als::begin(
+    void
+    )
+    {
+    if (this->getState() == State::Uninitialized)
+        {
+        this->m_startTime = millis();
+        this->m_delay = LTR_329ALS_PARAMS::getInitialDelayMs();
+
+        this->setState(State::Initializing);
+        }
+    }
+
+#undef FUNCTION
+
 bool
 Ltr_329als::startSingleMeasurement()
     {
@@ -93,7 +139,7 @@ bool Ltr_329als::queryReady(bool &fError)
         fError = false;
         return true;
         }
-    
+
     if (this->getState() == State::Idle)
         {
         fError = true;
