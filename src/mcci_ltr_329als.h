@@ -152,7 +152,7 @@ public:
         I2cReadLong,                ///< too many bytes from read
         NoWire,                     ///< internal error: the wire pointer is null.
         InternalInvalidParameter,   ///< internal error: invalid parmaeter
-
+        Uninitialized,              ///< internal error: driver is not running
         };
 
 private:
@@ -229,11 +229,17 @@ public:
     /// \brief power up and start operation
     bool begin();
 
+    /// \brief read product information
+    bool readProductInfo(void);
+
     /// \brief configure measurement
     bool configure(AlsGain_t::Gain_t g, AlsMeasRate_t::Rate_t r, AlsMeasRate_t::Integration_t iTime);
 
     /// \brief abstract type: holds a count of milliseconds
     using ms_t = decltype(millis());
+
+    /// \brief abstract type: holds register address
+    using Register_t = LTR_329ALS_PARAMS::Reg_t;
 
     /// \brief start a single measurement.
     bool startSingleMeasurement();
@@ -314,7 +320,10 @@ protected:
         }
 
     /// \brief write a byte to a given register.
-    bool writeRegister(Reg_t r, std::uint8_t v);
+    bool writeRegister(Register_t r, std::uint8_t v);
+
+    /// \brief read a byte from a given register.
+    bool readRegister(Register_t r);
 
     //
     // The local variables
@@ -323,7 +332,9 @@ private:
     TwoWire     *m_wire;                ///< pointer to I2C bus
     AlsGain_t::Gain_t m_userGain;       ///< user-requested gain
     AlsMeasRate_t::Integration_t m_userIntegration;     ///< user-reqeusted integration period
+    AlsMeasRate_t::Rate_t m_userRate;   ///< user-reqeusted measurement repeat rate
     ms_t        m_startTime;            ///< when the last measurement was started
+    ms_t        m_delay;                ///< when the last measurement was started
     Error       m_lastError;            ///< last error
     AlsContr_t  m_control;              ///< control register
     AlsMeasRate_t m_rate;               ///< rate/integration register
@@ -331,6 +342,8 @@ private:
     DataRegs_t  m_rawChannels;          ///< last raw data result.
     AlsStatus_t  m_saveStatus;          ///< status from last measurement
     AlsMeasRate_t m_saveMeasRate;       ///< AlsMeasRate_t from last measurement
+    PartID_t    m_partid;               ///< part id register
+    ManufacID_t m_manufacid;            ///< manufac id register
     };
 
 } // end namespace Mcci_Ltr_329als

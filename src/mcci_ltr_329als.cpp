@@ -14,6 +14,8 @@ Author:
 */
 
 #include "mcci_ltr_329als.h"
+#include <Arduino.h>
+#include <stdint.h>
 
 using namespace Mcci_Ltr_329als;
 
@@ -74,22 +76,106 @@ Ltr_329als::begin(
     void
     )
     {
-    if (this->getState() == State::Uninitialized)
+    // if no Wire is bound, fail.
+    if (this->m_wire == nullptr)
+        return this->setLastError(Error::NoWire);
+
+    if (this->isRunning())
+        return true;
+
+    this->m_wire->begin();
+    bool result = this->readProductInfo();
+
+    if (result && (this->getState() == State::Uninitialized))
         {
         this->m_startTime = millis();
         this->m_delay = LTR_329ALS_PARAMS::getInitialDelayMs();
 
-        this->setState(State::Initializing);
+        this->setState(State::Initial);
         }
+
+    return result;
     }
 
 #undef FUNCTION
+
+bool
+Ltr_329als::readProductInfo(
+    void
+    )
+    {
+    uint8_t PartId;
+    uint8_t ManufacId;
+
+    PartId = this->readRegister(Register_t::PART_ID);
+    ManufacId = this->readRegister(Register_t::MANUFAC_ID);
+
+    if ((PartId >> 4) != m_partid.kPartID ||
+        ManufacId != m_manufacid.kManufacID)
+        return false;
+
+    return true;
+    }
+
+bool
+Ltr_329als::configure(
+    AlsGain_t::Gain_t g,
+    AlsMeasRate_t::Rate_t r,
+    AlsMeasRate_t::Integration_t iTime)
+    {
+    this->m_userGain = g;
+    AlsContr_t(0).setGain(this->m_userGain);
+
+    this->m_userRate = r;
+    this->m_userIntegration = iTime;
+    AlsMeasRate_t(0)
+            .setRate(this->m_userRate)
+            .setIntegration(this->m_userIntegration)
+            ;
+
+    if (! this->checkRunning())
+        return false;
+
+    if (! this->writeRegister(Register_t::ALS_MEAS_RATE, this->m_rate.getValue()))
+        return false;
+
+    if (this->writeRegister(Register_t::ALS_CONTR, this->m_control.getValue()))
+        {
+        // we started.
+        this->m_startTime = millis();
+        this->m_saveMeasRate = this->m_rate;
+        this->m_saveStatus = AlsStatus_t(0);
+        this->setState(State::Single);
+        return true;
+        }
+    }
+
+bool
+Ltr_329als::readMeasurement()
+    {
+    if (! this->checkRunning())
+        return false;
+
+    if (this->getState() != State::Idle)
+        {
+        // busy
+        return this->setLastError(Error::Busy);
+        }
+    else
+        {
+        this->m_rawChannels.m_data[1] = this->readRegister(Register_t::ALS_DATA_CH1_0);
+        this->m_rawChannels.m_data[0] = this->readRegister(Register_t::ALS_DATA_CH1_1);
+        this->m_rawChannels.m_data[3] = this->readRegister(Register_t::ALS_DATA_CH0_0);
+        this->m_rawChannels.m_data[2] = this->readRegister(Register_t::ALS_DATA_CH0_1);
+        }
+    }
 
 bool
 Ltr_329als::startSingleMeasurement()
     {
     if (! this->checkRunning())
         return false;
+
     if (this->getState() == State::Single)
         // already measuring
         return true;
@@ -107,14 +193,14 @@ Ltr_329als::startSingleMeasurement()
                                 ;
         this->m_control = AlsContr_t(0)
                                 .setGain(this->m_userGain)
-                                .setActiveMode(true)
+                                .setActive(true)
                                 .setReset(false)
                                 ;
 
-        if (! this->writeRegister(Reg_t::ALS_MEAS_RATE, this->m_rate.getValue()))
+        if (! this->writeRegister(Register_t::ALS_MEAS_RATE, this->m_rate.getValue()))
             return false;
 
-        if (this->writeRegister(Reg_t::ALS_CONTR, this->m_control.getValue()))
+        if (this->writeRegister(Register_t::ALS_CONTR, this->m_control.getValue()))
             {
             // we started.
             this->m_startTime = millis();
@@ -124,6 +210,14 @@ Ltr_329als::startSingleMeasurement()
             return true;
             }
         }
+    }
+
+float Ltr_329als::getLux()
+    {
+    bool fError;
+    float ambientLight;
+
+    ambientLight = this->m_rawChannels.computeLux(&fError);
     }
 
 bool Ltr_329als::queryReady(bool &fError)
