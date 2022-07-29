@@ -44,11 +44,6 @@ namespace Mcci_Ltr_329als_Regs {
         /// \brief the I2C address of the LTR-329ALS.
         static constexpr std::uint8_t Address = 0x29;
 
-        /// \brief gain, measurement time and integration time for White LED.
-        static constexpr std::uint8_t kGain = 96;
-        static constexpr std::uint8_t kIntegrationTime = 50;
-        static constexpr std::uint8_t kMeasurementTime = 100;
-
         /// \brief register addresses within the LTR-329ALS.
         enum class Reg_t : std::uint8_t
             {
@@ -663,6 +658,7 @@ namespace Mcci_Ltr_329als_Regs {
             this->m_data[1] = 0;
             this->m_data[2] = 0;
             this->m_data[3] = 0;
+            this->m_status = AlsStatus_t(0).setValid(false).setNew(false);
             }
 
         /// \brief return a pointer to the base of the data buffer
@@ -687,6 +683,12 @@ namespace Mcci_Ltr_329als_Regs {
         void setMeasRate(AlsMeasRate_t measRate)
             {
             this->m_measrate = measRate;
+            }
+
+        /// \brief get the integration time previously saved
+        AlsMeasRate_t::Integration_t getIntegrationTime() const
+            {
+            return this->m_measrate.getIntegration();
             }
 
         ///

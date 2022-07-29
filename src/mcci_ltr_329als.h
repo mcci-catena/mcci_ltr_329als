@@ -140,6 +140,31 @@ public:
     static constexpr Version_t kVersion = Version_t(1, 0, 0, 1);
 
     ///
+    /// \brief initial sensor gain.
+    ///
+    /// The initial sensor gain is 1. This is chosen to allow measurement of full scale range.
+    ///
+    static constexpr AlsGain_t::Gain_t kInitialGain = 1;
+
+    ///
+    /// \brief initial integration time.
+    ///
+    /// The initial integration time is 100 ms. This value is chosen to allow measurement
+    /// of the full scale range of the sensor.
+    ///
+    static constexpr AlsMeasRate_t::Integration_t kInitialIntegrationTime = 100;
+
+    ///
+    /// \brief initial measurment rate in ms per measurement.
+    ///
+    /// The inital measurement rate is 1000 ms. This value is chosen so we have
+    /// time to put the device back to sleep after single measurements, which is
+    /// our intended mode of operation.
+    ///
+    static constexpr AlsMeasRate_t::Rate_t kInitialMeasurementRate = 1000;
+
+
+    ///
     /// \brief Error codes
     ///
     enum class Error : std::uint8_t
@@ -148,9 +173,14 @@ public:
         InvalidParameter,           ///< invalid parameter to API
         Busy,                       ///< busy doing a measurement
         NotMeasuring,               ///< not measuring; will never become ready.
+        TimedOut,                   ///< measurement timed out
+        InvalidData,                ///< Lux data couldn't be converted.
+        PartIdMismatch,             ///< part ID did not match library
         I2cReadRequest,             ///< read request failed to start.
         I2cReadShort,               ///< too few bytes from read
         I2cReadLong,                ///< too many bytes from read
+        I2cWriteFailed,             ///< I2C write failure
+        I2cWriteBufferFailed,       ///< I2C write buffer fill failure
         NoWire,                     ///< internal error: the wire pointer is null.
         InternalInvalidParameter,   ///< internal error: invalid parmaeter
         Uninitialized,              ///< internal error: driver is not running
@@ -167,15 +197,17 @@ private:
         "InvalidParameter"          "\0"
         "Busy"                      "\0"
         "NotMeasuring"              "\0"
+        "TimedOut"                  "\0"
+        "InvalidData"               "\0"
+        "PartIdMismatch"            "\0"
         "I2cReadRequest"            "\0"
         "I2cReadShort"              "\0"
         "I2cReadLong"               "\0"
-        "CommandWriteFailed"        "\0"
+        "I2cWriteFailed"            "\0"
+        "I2cWriteBufferFailed"      "\0"
         "NoWire"                    "\0"
         "InternalInvalidParameter"  "\0"
-        "CommandWriteBufferFailed"  "\0"
-        "Busy"                      "\0"
-        "InternalInvalidState"      "\0"
+        "Uninitialized"             "\0"
         ;
 
 public:
@@ -189,7 +221,7 @@ public:
         Initial,            ///< initial after begin (standby mode)
         Idle,               ///< idle (not measuring, active mode)
         Single,             ///< running a single measurement.
-        Triggered,          ///< continuous measurement running, no data available.
+        Continuous,          ///< continuous measurement running, no data available.
         Ready,              ///< continuous measurement running, data availble.
         };
 
@@ -202,9 +234,12 @@ private:
     static constexpr const char * const m_szStateNames =
         "Uninitialized" "\0"
         "End"           "\0"
+        "PowerOff"      "\0"
+        "PowerOn"       "\0"
         "Initial"       "\0"
         "Idle"          "\0"
-        "Triggered"     "\0"
+        "Single"        "\0"
+        "Continuous"     "\0"
         "Ready"         "\0"
         ;
 
@@ -227,7 +262,13 @@ public:
     Ltr_329als(const Ltr_329als&&) = delete;
     Ltr_329als& operator=(const Ltr_329als&&) = delete;
 
-    /// \brief power up and start operation
+    ///
+    /// \brief Power up the light sensor and start operation.
+    ///
+    /// \return
+    ///     \c true for success, \c false for failure (in which case the the last
+    ///     error is set to the error reason).
+    ///
     bool begin();
 
     /// \brief read product information
@@ -243,22 +284,54 @@ public:
     using Register_t = LTR_329ALS_PARAMS::Reg_t;
 
     /// \brief start a single measurement.
-    bool startSingleMeasurement();
+    bool startSingleMeasurement()
+        {
+        return startMeasurement(true);
+        }
 
+    /// \brief start a single measurement.
+    bool startMeasurement(bool fSingle = true);
+
+    ///
     /// \brief find out whether a measurement is ready
-    bool queryReady(bool &fCommError);
+    ///
+    /// \param [out] fError used to distinguish
+    ///         hard errors from "not ready"
+    ///
+    /// \return
+    ///     \c true if a measurement is ready and in the
+    ///     buffer. \c false if a measurement is not
+    ///     yet ready. See details.
+    ///
+    /// \details
+    ///     In the normal course of events, you'll start
+    ///     a measurement using startMeasurement(), then
+    ///     poll queryReady() until the value becomes
+    ///     \c true.  However, if a hard error occurs,
+    ///     queryReady() will never return \c true. To
+    ///     write robust code, you must check fError
+    ///     to distinguish between a hard error and
+    ///     not-yet error.
+    ///
+    ///     When queryReady() returns \c true, you
+    ///     may either call getLux() to conver the
+    ///     data to lux, or else save \refitem m_data
+    ///     in a local variable, and convert it
+    ///     later.
+    ///
+    bool queryReady(bool &fError);
 
-    /// \brief read a measurement to the buffer
-    bool readMeasurement();
-
-    /// \brief read a measured data status
-    void readDataStatus();
-
-    /// \brief read a measured data status
-    bool isDataValid();
-
-    /// \brief getLux
-    float getLux() const;
+    ///
+    /// \brief Convert the data in the buffer to lux, and return.
+    ///
+    /// If the data is not valid, 0.0f is returned, and the last
+    /// error is set. If the data is valid, the computed lux are
+    /// returned, and the last error is left unchanged.
+    ///
+    /// The conversion takes into account the selected gain and
+    /// integration time.
+    ///
+    float getLux();
 
     /// \brief reset and stop any ongoing measurement
     bool reset();
@@ -326,11 +399,64 @@ protected:
             return true;
         }
 
-    /// \brief write a byte to a given register.
+    ///
+    /// \brief Write a byte to a given register.
+    ///
+    /// \param [in] r selects the register to write
+    /// \param [in] v is the value to be written.
+    ///
+    /// \return
+    ///     \c true for success, \c false for failure. The
+    ///     last error is set in case of error.
+    ///
     bool writeRegister(Register_t r, std::uint8_t v);
 
+    ///
     /// \brief read a byte from a given register.
-    uint8_t readRegister(Register_t r);
+    ///
+    /// \param [in] r indicates the register to be read.
+    /// \param [out] v is set to the value read (if no error).
+    ///
+    /// \return
+    ///     \c true for success, \c false for failure. The
+    ///     last error is set in case of error.
+    ///
+    bool readRegister(Register_t r, std::uint8_t &v);
+
+    ///
+    /// \brief read a series of bytes starting with a given register.
+    ///
+    /// \param [in] r indicates the starting register to be read.
+    /// \param [out] pBuffer points to the buffer to receive the data
+    /// \param [in] nBuffer is the number of bytes to read.
+    ///
+    /// \return
+    ///     \c true for success, \c false for failure. The
+    ///     last error is set in case of error.
+    ///
+    bool readRegisters(Register_t r, std::uint8_t *pBuffer, size_t nBuffer);
+
+
+    ///
+    /// \brief Set up the control and measurement registers
+    ///
+    /// This routine should be called before kicking off a measurement.
+    /// It ensures that the sensors control and measrate registers
+    /// match what the user requested.
+    ///
+    bool setupMeasurement();
+
+    ///
+    /// \brief update m_status from the status register
+    ///
+    /// \details
+    ///     The ALS_STATUS register is read and stored into \refitem m_status.
+    ///
+    /// \return
+    ///     \c true for success, \c false for failure. The
+    ///     last error is set in case of error.
+    ///
+    bool readDataStatus();
 
     //
     // The local variables
@@ -341,10 +467,11 @@ private:
     AlsMeasRate_t::Integration_t m_userIntegration;     ///< user-reqeusted integration period
     AlsMeasRate_t::Rate_t m_userRate;   ///< user-reqeusted measurement repeat rate
     ms_t        m_startTime;            ///< when the last measurement was started
-    ms_t        m_delay;                ///< when the last measurement was started
+    ms_t        m_pollTime;             ///< last time mesurement was polled
+    ms_t        m_delay;                ///< ms to delay
     Error       m_lastError;            ///< last error
     AlsContr_t  m_control;              ///< control register
-    AlsMeasRate_t m_rate;               ///< rate/integration register
+    AlsMeasRate_t m_measrate;               ///< rate/integration register
     AlsStatus_t m_status;               ///< status register
     DataRegs_t  m_rawChannels;          ///< last raw data result.
     AlsStatus_t  m_saveStatus;          ///< status from last measurement
