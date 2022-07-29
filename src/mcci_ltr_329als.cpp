@@ -387,6 +387,7 @@ bool Ltr_329als::readDataStatus()
         return false;
 
     this->m_status = AlsStatus_t(uStatus);
+    return true;
     }
 
 // protected
