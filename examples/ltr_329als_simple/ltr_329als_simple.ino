@@ -138,11 +138,10 @@ void loop()
             printFailure("queryReady() failed");
         }
 
+    // startSingleMeasurement/queryReady puts the sensor to sleep, so no work needed.
+
     // get the results.
     currentLux = gLtr.getLux();
-
-    // put the sensor to sleep.
-    gLtr.end();
 
     // display the results by fetching then displaying.
     Serial.print("light=");
