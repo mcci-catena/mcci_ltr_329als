@@ -379,17 +379,44 @@ public:
         return getErrorName(this->m_lastError);
         }
 
+    /// \brief return a const reference to the data regs
+    const DataRegs_t &getRawData() const
+        {
+        return this->m_rawChannels;
+        }
+
 protected:
     /// \brief put the LTR-329ALS into low-power standby
     bool    setStandby();
 
-    /// \brief change state
-    void    setState(State s);
+    ///
+    /// \brief Change state of driver.
+    ///
+    /// \param [in] s is the new state
+    ///
+    /// \details
+    ///     This function changes the recorded state of the driver instance.
+    ///     When debugging, this might also log state changes; you can do that
+    ///     by overriding this method in a derived class.
+    ///
+    virtual void setState(State s)
+        {
+        this->m_state = s;
+        }
 
     ///
-    /// \brief make sure the driver is running
+    /// \brief Make sure the driver is running
     ///
     /// If not running, set last error to Error::Uninitialized, and return \c false.
+    /// Otherwise return \c true.
+    ///
+    /// Normally used in the following pattern:
+    ///
+    /// \code
+    ///     if (! this->checkRunning())
+    ///         return false;
+    ///     // otherwise do some work...
+    /// \endcode
     ///
     bool checkRunning()
         {
@@ -470,6 +497,7 @@ private:
     ms_t        m_pollTime;             ///< last time mesurement was polled
     ms_t        m_delay;                ///< ms to delay
     Error       m_lastError;            ///< last error
+    State       m_state;                ///< state of measurement engine
     AlsContr_t  m_control;              ///< control register
     AlsMeasRate_t m_measrate;               ///< rate/integration register
     AlsStatus_t m_status;               ///< status register
@@ -477,8 +505,7 @@ private:
     AlsStatus_t  m_saveStatus;          ///< status from last measurement
     AlsMeasRate_t m_saveMeasRate;       ///< AlsMeasRate_t from last measurement
     PartID_t    m_partid;               ///< part id register
-    ManufacID_t m_manufacid;            ///< manufac id register
-    State       m_state;                ///< state of measurement engine
+    ManufacID_t m_manufacid;            ///< manufacturer id register
     };
 
 } // end namespace Mcci_Ltr_329als
