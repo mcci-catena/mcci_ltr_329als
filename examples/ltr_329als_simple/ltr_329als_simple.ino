@@ -146,7 +146,11 @@ void loop()
     // display the results by fetching then displaying.
     Serial.print("light=");
     Serial.print(currentLux);
-    Serial.println(" lux");
+    Serial.print(" lux (gain=");
+    Serial.print(gLtr.getRawData().getGain());
+    Serial.print(", integration=");
+    Serial.print(gLtr.getRawData().getIntegrationTime());
+    Serial.println(")");
 
     delay(2000);
     }
