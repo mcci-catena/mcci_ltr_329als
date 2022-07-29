@@ -128,8 +128,8 @@ void loop()
     digitalWrite(LED_BUILTIN, fLed);
 
     // start a measurement
-    if (! gLtr.startMeasurement(true))
-        printFailure("gLtr.startMeasurement() failed");
+    if (! gLtr.startSingleMeasurement())
+        printFailure("gLtr.startSingleMeasurement() failed");
 
     // wait for measurement to complete.
     while (! gLtr.queryReady(fError))
