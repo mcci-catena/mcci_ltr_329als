@@ -706,6 +706,12 @@ namespace Mcci_Ltr_329als_Regs {
             return this->m_measrate.getIntegration();
             }
 
+        /// \brief return the gain used for making this measuremetn.
+        AlsGain_t::Gain_t getGain() const
+            {
+            return this->m_status.getGain();
+            }
+
         ///
         /// \brief Compute abstract value of lux based on datasheet
         ///
