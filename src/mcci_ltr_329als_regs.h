@@ -646,9 +646,9 @@ namespace Mcci_Ltr_329als_Regs {
         {
     private:
         /// \brief the register images in I2C order
-        std::uint8_t m_data[4];
-        AlsStatus_t m_status;       ///< recorded status register when data was grabbed.
-        AlsMeasRate_t m_measrate;   ///< recorded measrate used for grabbing the data
+        std::uint8_t m_data[4] = {};
+        AlsStatus_t m_status = 0;       ///< recorded status register when data was grabbed.
+        AlsMeasRate_t m_measrate = 0;   ///< recorded measrate used for grabbing the data
 
 
     public:
