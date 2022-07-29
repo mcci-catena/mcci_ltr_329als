@@ -241,7 +241,8 @@ namespace Mcci_Ltr_329als_Regs {
     class AlsContr_t : public LTR_329ALS_PARAMS, LTR_329ALS_PARAMS::Field_t<std::uint8_t>, AlsGain_t
         {
     private:
-        AlsContr_t & setValue(std::uint8_t fmask, std::uint8_t value)
+        /// \brief set value under mask
+        constexpr AlsContr_t & setValue(std::uint8_t fmask, std::uint8_t value)
             {
             this->m_value = fieldset(fmask, this->m_value, value);
             return *this;
@@ -341,7 +342,8 @@ namespace Mcci_Ltr_329als_Regs {
     class AlsMeasRate_t : public LTR_329ALS_PARAMS, LTR_329ALS_PARAMS::Field_t<std::uint8_t>
         {
     private:
-        AlsMeasRate_t & setValue(std::uint8_t fmask, std::uint8_t value)
+        /// \brief set value under mask
+        constexpr AlsMeasRate_t & setValue(std::uint8_t fmask, std::uint8_t value)
             {
             this->m_value = fieldset(fmask, this->m_value, value);
             return *this;
@@ -474,7 +476,7 @@ namespace Mcci_Ltr_329als_Regs {
         {
     private:
         /// \brief set value under mask
-        PartID_t & setValue(std::uint8_t fmask, std::uint8_t value)
+        constexpr PartID_t & setValue(std::uint8_t fmask, std::uint8_t value)
             {
             this->m_value = fieldset(fmask, this->m_value, value);
             return *this;
@@ -518,7 +520,7 @@ namespace Mcci_Ltr_329als_Regs {
         {
     private:
         /// \brief set value under mask
-        ManufacID_t & setValue(std::uint8_t fmask, std::uint8_t value)
+        constexpr ManufacID_t & setValue(std::uint8_t fmask, std::uint8_t value)
             {
             this->m_value = fieldset(fmask, this->m_value, value);
             return *this;
@@ -562,7 +564,8 @@ namespace Mcci_Ltr_329als_Regs {
     class AlsStatus_t : public LTR_329ALS_PARAMS, LTR_329ALS_PARAMS::Field_t<std::uint8_t>, AlsGain_t
         {
     private:
-        AlsStatus_t & setValue(std::uint8_t fmask, std::uint8_t value)
+        /// \brief set value under mask
+        constexpr AlsStatus_t & setValue(std::uint8_t fmask, std::uint8_t value)
             {
             this->m_value = fieldset(fmask, this->m_value, value);
             return *this;
