@@ -247,10 +247,12 @@ namespace Mcci_Ltr_329als_Regs {
             return *this;
             }
 
-        std::uint8_t m_value;
+        std::uint8_t m_value = 0;
 
     public:
-        AlsContr_t(std::uint8_t mask = 0)
+        AlsContr_t() = default;
+
+        AlsContr_t(std::uint8_t mask)
             : m_value(mask)
             {}
 
@@ -345,10 +347,11 @@ namespace Mcci_Ltr_329als_Regs {
             return *this;
             }
 
-        std::uint8_t m_value;
+        std::uint8_t m_value = 0;
 
     public:
-        AlsMeasRate_t(std::uint8_t mask = 0)
+        AlsMeasRate_t() = default;
+        AlsMeasRate_t(std::uint8_t mask)
             : m_value(mask)
             {}
 
@@ -470,16 +473,18 @@ namespace Mcci_Ltr_329als_Regs {
     class PartID_t : public LTR_329ALS_PARAMS, LTR_329ALS_PARAMS::Field_t<std::uint8_t>
         {
     private:
+        /// \brief set value under mask
         PartID_t & setValue(std::uint8_t fmask, std::uint8_t value)
             {
             this->m_value = fieldset(fmask, this->m_value, value);
             return *this;
             }
 
-        std::uint8_t m_value;
+        std::uint8_t m_value = 0;
 
     public:
-        PartID_t(std::uint8_t mask = 0)
+        PartID_t() = default;
+        PartID_t(std::uint8_t mask)
             : m_value(mask)
             {}
 
@@ -512,16 +517,19 @@ namespace Mcci_Ltr_329als_Regs {
     class ManufacID_t : public LTR_329ALS_PARAMS, LTR_329ALS_PARAMS::Field_t<std::uint8_t>
         {
     private:
+        /// \brief set value under mask
         ManufacID_t & setValue(std::uint8_t fmask, std::uint8_t value)
             {
             this->m_value = fieldset(fmask, this->m_value, value);
             return *this;
             }
 
-        std::uint8_t m_value;
+        /// \brief the value of the register image
+        std::uint8_t m_value = 0;
 
     public:
-        ManufacID_t(std::uint8_t mask = 0)
+        ManufacID_t() = default;
+        ManufacID_t(std::uint8_t mask)
             : m_value(mask)
             {}
 
@@ -560,10 +568,12 @@ namespace Mcci_Ltr_329als_Regs {
             return *this;
             }
 
-        std::uint8_t m_value;
+        /// \brief the binary value of this register
+        std::uint8_t m_value = 0;
 
     public:
-        AlsStatus_t(std::uint8_t mask = 0)
+        AlsStatus_t() = default;
+        AlsStatus_t(std::uint8_t mask)
             : m_value(mask)
             {}
 
@@ -639,6 +649,8 @@ namespace Mcci_Ltr_329als_Regs {
 
 
     public:
+        DataRegs_t() = default;
+
         /// \brief get the value of channel 0 from the measurement
         std::uint16_t getChan0() const
             {
