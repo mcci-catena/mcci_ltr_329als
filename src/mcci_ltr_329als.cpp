@@ -404,9 +404,13 @@ bool Ltr_329als::readRegisters(Register_t r, std::uint8_t *pBuffer, size_t nBuff
 
     this->m_wire->beginTransmission(LTR_329ALS_PARAMS::Address);
     if (this->m_wire->write((uint8_t)r) != 1)
-        return false;
+        {
+        return this->setLastError(Error::I2cReadRequest);
+        }
     if (this->m_wire->endTransmission() != 0)
-        return false;
+        {
+        return this->setLastError(Error::I2cReadRequest);
+        }
 
     auto nReadFrom = this->m_wire->requestFrom(LTR_329ALS_PARAMS::Address, std::uint8_t(nBuffer));
 
