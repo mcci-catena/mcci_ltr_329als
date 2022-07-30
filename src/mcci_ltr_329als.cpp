@@ -402,6 +402,12 @@ bool Ltr_329als::readRegisters(Register_t r, std::uint8_t *pBuffer, size_t nBuff
     if (pBuffer == nullptr || nBuffer > 32)
         return this->setLastError(Error::InternalInvalidParameter);
 
+    this->m_wire->beginTransmission(LTR_329ALS_PARAMS::Address);
+    if (this->m_wire->write((uint8_t)r) != 1)
+        return false;
+    if (this->m_wire->endTransmission() != 0)
+        return false;
+
     auto nReadFrom = this->m_wire->requestFrom(LTR_329ALS_PARAMS::Address, std::uint8_t(nBuffer));
 
     if (nReadFrom != nBuffer)
@@ -424,7 +430,10 @@ bool Ltr_329als::readRegisters(Register_t r, std::uint8_t *pBuffer, size_t nBuff
 bool Ltr_329als::writeRegister(Register_t r, std::uint8_t v)
     {
     this->m_wire->beginTransmission(LTR_329ALS_PARAMS::Address);
-    if (this->m_wire->write(v) != 1)
+
+    if (this->m_wire->write((uint8_t)r) != 1)
+        return this->setLastError(Error::I2cWriteBufferFailed);
+    if (this->m_wire->write((uint8_t)v) != 1)
         return this->setLastError(Error::I2cWriteBufferFailed);
 
     if (this->m_wire->endTransmission() != 0)
