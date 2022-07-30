@@ -433,11 +433,10 @@ bool Ltr_329als::readRegisters(Register_t r, std::uint8_t *pBuffer, size_t nBuff
 // protected
 bool Ltr_329als::writeRegister(Register_t r, std::uint8_t v)
     {
+    const std::uint8_t cmdbuf[2] = { (std::uint8_t)r, v };
     this->m_wire->beginTransmission(LTR_329ALS_PARAMS::Address);
 
-    if (this->m_wire->write((uint8_t)r) != 1)
-        return this->setLastError(Error::I2cWriteBufferFailed);
-    if (this->m_wire->write((uint8_t)v) != 1)
+    if (this->m_wire->write(cmdbuf, sizeof(cmdbuf)) != sizeof(cmdbuf))
         return this->setLastError(Error::I2cWriteBufferFailed);
 
     if (this->m_wire->endTransmission() != 0)
