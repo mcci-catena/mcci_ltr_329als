@@ -416,7 +416,7 @@ bool Ltr_329als::readRegisters(Register_t r, std::uint8_t *pBuffer, size_t nBuff
 
     if (nReadFrom != nBuffer)
         return this->setLastError(Error::I2cReadRequest);
-    auto nResult = unsigned(this->m_wire->available());
+    auto const nResult = unsigned(this->m_wire->available());
 
     if (nResult > nBuffer)
         return this->setLastError(Error::I2cReadLong);
