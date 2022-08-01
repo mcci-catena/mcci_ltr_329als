@@ -213,8 +213,8 @@ Ltr_329als::configure(
 
     this->m_measrate =
         AlsMeasRate_t(0)
-            .setRate(this->m_userRate)
-            .setIntegration(this->m_userIntegration)
+            .setRate(r)
+            .setIntegration(iTime)
             ;
 
     return true;
