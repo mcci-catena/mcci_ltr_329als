@@ -69,8 +69,8 @@ namespace Mcci_Ltr_329als_Regs {
         /// \brief bits in the LTR-329ALS \c ALS_MEAS_RATE register
         enum class ALS_MEAS_RATE_BITS : std::uint8_t
             {
-            RATE = (3 << 0),                    ///< measurement rate
-            TIME = (3 << 3),                    ///< integration time
+            RATE = (7 << 0),                    ///< measurement rate
+            TIME = (7 << 3),                    ///< integration time
             };
 
         /// \brief bits in the LTR-32lALS \c PART_ID register
