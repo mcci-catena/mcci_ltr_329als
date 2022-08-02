@@ -467,15 +467,6 @@ protected:
 
 
     ///
-    /// \brief Set up the control and measurement registers
-    ///
-    /// This routine should be called before kicking off a measurement.
-    /// It ensures that the sensors control and measrate registers
-    /// match what the user requested.
-    ///
-    bool setupMeasurement();
-
-    ///
     /// \brief update m_status from the status register
     ///
     /// \details
