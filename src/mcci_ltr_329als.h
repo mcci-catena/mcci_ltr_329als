@@ -331,6 +331,8 @@ public:
     /// The conversion takes into account the selected gain and
     /// integration time.
     ///
+    /// \return light value in lux.
+    ///
     float getLux();
 
     /// \brief reset and stop any ongoing measurement
