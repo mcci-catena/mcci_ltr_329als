@@ -12,6 +12,73 @@ It has the following design principles.
 
 4. There are no infinite delays that are not guarded by timeouts (whether blocking or non-blocking); all operations will eventually complete, even if the sensor hardware hangs.
 
+## Quick Intro
+
+This library uses the LTR-329ALS sensor to take light measurements in units of lux. Using it is easy:
+
+1. Create an object of type `Ltr_329als`.
+2. Call the `Ltr_329als::begin()` method to initialize it.
+3. Call the `Ltr_329als::startSingleMeasurement()` method to launch an asynchronous measurement.
+4. Poll the sensor using `Ltr_329als::queryReady()` until the measurement is ready or a hard error is indicated.
+5. Convert the measurement to lux using `Ltr_329als::getLux()`.
+
+See [sample code](#sample-code) below for details of the required steps.
+
+## Sample Code
+
+1. The header file
+
+   ```c++
+   #include <mcci_ltr_329als.h>
+   ```
+
+2. The namespace:
+
+   ```c++
+   using namespace Mcci_Ltr_329als;
+   ```
+
+3. The global object:
+
+   ```c++
+   // declare the global light-sensor instance object,
+   // and attach it to the default TwoWire bus.
+   Ltr_329als gLtr {Wire};
+   ```
+
+4. Code in `setup()`:
+
+   ```c++
+   // initialize the LTR
+   if (! gLtr.begin())
+        /* the light sensor isn't working */;
+   ```
+
+5. Code in `loop()`. Note that this is very simplistic, but it will always continue through to the bottom. Because `Ltr_329als::queryReady()` doesn't block, it is straightforward to refactor this so that the light sensor doesn't delay other processing.
+
+   ```c++
+   bool fHardError = false;
+   if (gLtr.startSingleMeasurement()) {
+        while (! gLtr.queryReady(fHardError)) {
+                if (fHardError) {
+                        break;
+                }
+        }
+   } else {
+        fHardError = true;
+   }
+
+   float lux;
+
+   if (fHardError) {
+        // print gLtr.getErrorName and do what's
+        // best for your app
+   } else {
+        lux = gLtr.getLux();
+        // do something with lux value
+   }
+   ```
+
 ## Meta
 
 ### License
