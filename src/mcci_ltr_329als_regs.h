@@ -52,9 +52,9 @@ namespace Mcci_Ltr_329als_Regs {
             PART_ID         = 0x86,             ///< part number and revision ID
             MANUFAC_ID      = 0x87,             ///< manufacturer ID
             ALS_DATA_CH1_0  = 0x88,             ///< ALS measurement data channel 1, LSB
-            ALS_DATA_CH1_1  /* = 0x89 */,       ///< ALS measurement data channel 1, MSB
-            ALS_DATA_CH0_0  /* = 0x8A */,       ///< ALS measurement data channel 0, LSB
-            ALS_DATA_CH0_1  /* = 0x8B */,       ///< ALS measurement data channel 0, MSB
+            ALS_DATA_CH1_1  = 0x89,             ///< ALS measurement data channel 1, MSB
+            ALS_DATA_CH0_0  = 0x8A,             ///< ALS measurement data channel 0, LSB
+            ALS_DATA_CH0_1  = 0x8B,             ///< ALS measurement data channel 0, MSB
             ALS_STATUS      = 0x8C,             ///< ALS new data status
             };
 
@@ -69,8 +69,8 @@ namespace Mcci_Ltr_329als_Regs {
         /// \brief bits in the LTR-329ALS \c ALS_MEAS_RATE register
         enum class ALS_MEAS_RATE_BITS : std::uint8_t
             {
-            RATE = (3 << 0),                    ///< measurement rate
-            TIME = (3 << 3),                    ///< integration time
+            RATE = (7 << 0),                    ///< measurement rate
+            TIME = (7 << 3),                    ///< integration time
             };
 
         /// \brief bits in the LTR-32lALS \c PART_ID register
@@ -241,16 +241,19 @@ namespace Mcci_Ltr_329als_Regs {
     class AlsContr_t : public LTR_329ALS_PARAMS, LTR_329ALS_PARAMS::Field_t<std::uint8_t>, AlsGain_t
         {
     private:
-        AlsContr_t & setValue(std::uint8_t fmask, std::uint8_t value)
+        /// \brief set value under mask
+        constexpr AlsContr_t & setValue(std::uint8_t fmask, std::uint8_t value)
             {
             this->m_value = fieldset(fmask, this->m_value, value);
             return *this;
             }
 
-        std::uint8_t m_value;
+        std::uint8_t m_value = 0;
 
     public:
-        AlsContr_t(std::uint8_t mask = 0)
+        AlsContr_t() = default;
+
+        AlsContr_t(std::uint8_t mask)
             : m_value(mask)
             {}
 
@@ -339,16 +342,18 @@ namespace Mcci_Ltr_329als_Regs {
     class AlsMeasRate_t : public LTR_329ALS_PARAMS, LTR_329ALS_PARAMS::Field_t<std::uint8_t>
         {
     private:
-        AlsMeasRate_t & setValue(std::uint8_t fmask, std::uint8_t value)
+        /// \brief set value under mask
+        constexpr AlsMeasRate_t & setValue(std::uint8_t fmask, std::uint8_t value)
             {
             this->m_value = fieldset(fmask, this->m_value, value);
             return *this;
             }
 
-        std::uint8_t m_value;
+        std::uint8_t m_value = 0;
 
     public:
-        AlsMeasRate_t(std::uint8_t mask = 0)
+        AlsMeasRate_t() = default;
+        AlsMeasRate_t(std::uint8_t mask)
             : m_value(mask)
             {}
 
@@ -470,16 +475,18 @@ namespace Mcci_Ltr_329als_Regs {
     class PartID_t : public LTR_329ALS_PARAMS, LTR_329ALS_PARAMS::Field_t<std::uint8_t>
         {
     private:
-        PartID_t & setValue(std::uint8_t fmask, std::uint8_t value)
+        /// \brief set value under mask
+        constexpr PartID_t & setValue(std::uint8_t fmask, std::uint8_t value)
             {
             this->m_value = fieldset(fmask, this->m_value, value);
             return *this;
             }
 
-        std::uint8_t m_value;
+        std::uint8_t m_value = 0;
 
     public:
-        PartID_t(std::uint8_t mask = 0)
+        PartID_t() = default;
+        PartID_t(std::uint8_t mask)
             : m_value(mask)
             {}
 
@@ -512,16 +519,19 @@ namespace Mcci_Ltr_329als_Regs {
     class ManufacID_t : public LTR_329ALS_PARAMS, LTR_329ALS_PARAMS::Field_t<std::uint8_t>
         {
     private:
-        ManufacID_t & setValue(std::uint8_t fmask, std::uint8_t value)
+        /// \brief set value under mask
+        constexpr ManufacID_t & setValue(std::uint8_t fmask, std::uint8_t value)
             {
             this->m_value = fieldset(fmask, this->m_value, value);
             return *this;
             }
 
-        std::uint8_t m_value;
+        /// \brief the value of the register image
+        std::uint8_t m_value = 0;
 
     public:
-        ManufacID_t(std::uint8_t mask = 0)
+        ManufacID_t() = default;
+        ManufacID_t(std::uint8_t mask)
             : m_value(mask)
             {}
 
@@ -554,16 +564,19 @@ namespace Mcci_Ltr_329als_Regs {
     class AlsStatus_t : public LTR_329ALS_PARAMS, LTR_329ALS_PARAMS::Field_t<std::uint8_t>, AlsGain_t
         {
     private:
-        AlsStatus_t & setValue(std::uint8_t fmask, std::uint8_t value)
+        /// \brief set value under mask
+        constexpr AlsStatus_t & setValue(std::uint8_t fmask, std::uint8_t value)
             {
             this->m_value = fieldset(fmask, this->m_value, value);
             return *this;
             }
 
-        std::uint8_t m_value;
+        /// \brief the binary value of this register
+        std::uint8_t m_value = 0;
 
     public:
-        AlsStatus_t(std::uint8_t mask = 0)
+        AlsStatus_t() = default;
+        AlsStatus_t(std::uint8_t mask)
             : m_value(mask)
             {}
 
@@ -633,12 +646,14 @@ namespace Mcci_Ltr_329als_Regs {
         {
     private:
         /// \brief the register images in I2C order
-        std::uint8_t m_data[4];
-        AlsStatus_t m_status;       ///< recorded status register when data was grabbed.
-        AlsMeasRate_t m_measrate;   ///< recorded measrate used for grabbing the data
+        std::uint8_t m_data[4] = {};
+        AlsStatus_t m_status = 0;       ///< recorded status register when data was grabbed.
+        AlsMeasRate_t m_measrate = 0;   ///< recorded measrate used for grabbing the data
 
 
     public:
+        DataRegs_t() = default;
+
         /// \brief get the value of channel 0 from the measurement
         std::uint16_t getChan0() const
             {
@@ -658,6 +673,7 @@ namespace Mcci_Ltr_329als_Regs {
             this->m_data[1] = 0;
             this->m_data[2] = 0;
             this->m_data[3] = 0;
+            this->m_status = AlsStatus_t(0).setValid(false).setNew(false);
             }
 
         /// \brief return a pointer to the base of the data buffer
@@ -682,6 +698,18 @@ namespace Mcci_Ltr_329als_Regs {
         void setMeasRate(AlsMeasRate_t measRate)
             {
             this->m_measrate = measRate;
+            }
+
+        /// \brief get the integration time previously saved
+        AlsMeasRate_t::Integration_t getIntegrationTime() const
+            {
+            return this->m_measrate.getIntegration();
+            }
+
+        /// \brief return the gain used for making this measuremetn.
+        AlsGain_t::Gain_t getGain() const
+            {
+            return this->m_status.getGain();
             }
 
         ///
