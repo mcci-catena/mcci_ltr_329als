@@ -277,6 +277,31 @@ public:
     /// \brief configure measurement
     bool configure(AlsGain_t::Gain_t g, AlsMeasRate_t::Rate_t r, AlsMeasRate_t::Integration_t iTime);
 
+    ///
+    /// \brief Set the gain bits in an image of the \c ALS_CONTR register.
+    ///
+    /// \param [in] g is the gain, in [1, 2, 4, 8, 48, 96]
+    ///
+    /// If the value of \c g is not supported, the gain bits in the register
+    ///	image are set to select gain == 1.
+    ///
+    void setGain(std::uint8_t g)
+        {
+        this->m_control = this->m_control.setGain(g);
+        }
+
+    /// \brief set the measurement rate
+    void setRate(std::uint16_t rate)
+        {
+        this->m_measrate = this->m_measrate.setRate(rate);
+        }
+
+    /// \brief set the integration time
+    void setIntegration(std::uint16_t iTime)
+        {
+        this->m_measrate = this->m_measrate.setRate(iTime);
+        }
+
     /// \brief abstract type: holds a count of milliseconds
     using ms_t = std::uint32_t;
 
