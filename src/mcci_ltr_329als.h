@@ -137,7 +137,7 @@ class Ltr_329als
     {
 public:
     /// \brief the version number for this version of the library.
-    static constexpr Version_t kVersion = Version_t(1, 0, 0, 0);
+    static constexpr Version_t kVersion = Version_t(1, 1, 0, 0);	/* v1.1.0 */
 
     ///
     /// \brief initial sensor gain.
