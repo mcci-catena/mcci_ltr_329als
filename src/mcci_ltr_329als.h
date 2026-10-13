@@ -137,7 +137,7 @@ class Ltr_329als
     {
 public:
     /// \brief the version number for this version of the library.
-    static constexpr Version_t kVersion = Version_t(1, 1, 0, 0);	/* v1.1.0 */
+    static constexpr Version_t kVersion = Version_t(1, 1, 1, 1);	/* v1.1.1-pre1 */
 
     ///
     /// \brief initial sensor gain.
@@ -343,6 +343,13 @@ public:
     ///     data to lux, or else save \refitem m_data
     ///     in a local variable, and convert it
     ///     later.
+    ///
+    ///     queryReady() also returns \c true when the
+    ///     sensor marks the data invalid, for example
+    ///     when the light is too bright for the gain.
+    ///     getRawData().getStatus().getValid() is then
+    ///     \c false, and getLux() returns zero and sets
+    ///     the last error to Error::InvalidData.
     ///
     bool queryReady(bool &fError);
 
