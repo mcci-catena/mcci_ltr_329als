@@ -712,6 +712,16 @@ namespace Mcci_Ltr_329als_Regs {
             return this->m_status.getGain();
             }
 
+        /// \brief return the status saved with this measurement.
+        ///
+        /// \note getStatus().getValid() is false if the sensor marked the
+        ///     data invalid, for example when the light is too bright for
+        ///     the gain.
+        AlsStatus_t getStatus() const
+            {
+            return this->m_status;
+            }
+
         ///
         /// \brief Compute abstract value of lux based on datasheet
         ///

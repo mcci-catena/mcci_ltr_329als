@@ -309,7 +309,9 @@ bool Ltr_329als::queryReady(bool &fError)
         // don't poll for another 10 ms.
         this->m_pollTime = now;
 
-        if (! (this->m_status.getNew() && this->m_status.getValid()))
+        // accept new data even if the sensor marks it invalid (too bright
+        // for the gain); the caller checks getRawData().getStatus().
+        if (! this->m_status.getNew())
             {
             // check for timeout.
             if (now - this->m_startTime > 2 * this->m_rawChannels.getIntegrationTime())
